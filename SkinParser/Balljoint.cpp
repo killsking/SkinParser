@@ -284,13 +284,13 @@ void Balljoint::getBalljoint(ifstream &skelFile) {
 }
 
 //return matching joint id string based on numerical id
-void Balljoint::getID(string &id, int joint_id) {
+void Balljoint::getName(string &id, int joint_id) {
     if (this->joint_id == joint_id) {
         id = this->id;
     }
     else {
         for (Balljoint &subjoint : subjoints) {
-            subjoint.getID(id, joint_id);
+            subjoint.getName(id, joint_id);
         }
     }
 }

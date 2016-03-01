@@ -10,7 +10,7 @@
 #define BALLJOINT_H_INCLUDED
 
 //include dependancies
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <math.h>
 #include <iostream>
 #include <fstream>
@@ -45,7 +45,7 @@ public:
     Balljoint();
     map<int, vector<float>> getJointsLcs();
     void getBalljoint(ifstream &skelFile);
-    void getID(string &id, int joint_id);
+    void getName(string &id, int joint_id);
     void getPose(float *pose, int joint_id);
     void setPose(float *pose, int joint_id);
     void draw(double *parentMatrix);

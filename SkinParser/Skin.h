@@ -10,7 +10,7 @@
 #define SKIN_H_INCLUDED
 
 //include dependancies
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <math.h>
 #include <iostream>
 #include <fstream>
@@ -40,7 +40,8 @@ public:
     Skin();
     void getSkin(ifstream &skinFile);
     void smooth(map<int, vector<float>> &joints_lcs);
-    void outline(int joint_id);
+    void outlineJoint(int joint_id, float *lineColor);
+    void drawJoints();
     void draw();
     void print();
 };

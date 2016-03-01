@@ -9,6 +9,11 @@
 #include "Skin.h"
 #include "Functions.h"
 
+//global variables
+int v1;  //first vertex of triangle
+int v2;  //second vertex of triangle
+int v3;  //third vertex of triangle
+
 ///////////////////////
 //  private methods  //
 ///////////////////////
@@ -187,13 +192,9 @@ void Skin::getJoints() {
 //draw a single triangle
 void Skin::drawTriangle(vector<int> triangle) {
     //get the verticies specified by this triangle
-    int v1 = triangle[0];
-    int v2 = triangle[1];
-    int v3 = triangle[2];
-
-    //draw this triangle
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
+    v1 = triangle[0];
+    v2 = triangle[1];
+    v3 = triangle[2];
 
     //first vertex
     glNormal3f(ssa_normals[v1][0], ssa_normals[v1][1], ssa_normals[v1][2]);
@@ -207,35 +208,27 @@ void Skin::drawTriangle(vector<int> triangle) {
     glNormal3f(ssa_normals[v3][0], ssa_normals[v3][1], ssa_normals[v3][2]);
     glVertex3f(ssa_positions[v3][0], ssa_positions[v3][1], ssa_positions[v3][2]);
 
+    /* //draw normals
+    glBegin(GL_LINES);
+    glVertex3f(ssa_positions[v1][0], ssa_positions[v1][1], ssa_positions[v1][2]);
+    glVertex3f(ssa_positions[v1][0] + ssa_normals[v1][0] * 0.1,
+        ssa_positions[v1][1] + ssa_normals[v1][1] * 0.1,
+        ssa_positions[v1][2] + ssa_normals[v1][2] * 0.1);
     glEnd();
-    glPopMatrix();
 
-    //draw normals because we can
-    bool porcupine = true;
-    if (porcupine) {
-        glPushMatrix();
-        glBegin(GL_LINES);
-        glVertex3f(ssa_positions[v1][0], ssa_positions[v1][1], ssa_positions[v1][2]);
-        glVertex3f(ssa_positions[v1][0] + ssa_normals[v1][0] * 0.1,
-            ssa_positions[v1][1] + ssa_normals[v1][1] * 0.1,
-            ssa_positions[v1][2] + ssa_normals[v1][2] * 0.1);
-        glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(ssa_positions[v2][0], ssa_positions[v2][1], ssa_positions[v2][2]);
+    glVertex3f(ssa_positions[v2][0] + ssa_normals[v2][0] * 0.1,
+        ssa_positions[v2][1] + ssa_normals[v2][1] * 0.1,
+        ssa_positions[v2][2] + ssa_normals[v2][2] * 0.1);
+    glEnd();
 
-        glBegin(GL_LINES);
-        glVertex3f(ssa_positions[v2][0], ssa_positions[v2][1], ssa_positions[v2][2]);
-        glVertex3f(ssa_positions[v2][0] + ssa_normals[v2][0] * 0.1,
-            ssa_positions[v2][1] + ssa_normals[v2][1] * 0.1,
-            ssa_positions[v2][2] + ssa_normals[v2][2] * 0.1);
-        glEnd();
-
-        glBegin(GL_LINES);
-        glVertex3f(ssa_positions[v3][0], ssa_positions[v3][1], ssa_positions[v3][2]);
-        glVertex3f(ssa_positions[v3][0] + ssa_normals[v3][0] * 0.1,
-            ssa_positions[v3][1] + ssa_normals[v3][1] * 0.1,
-            ssa_positions[v3][2] + ssa_normals[v3][2] * 0.1);
-        glEnd();
-        glPopMatrix();
-    }
+    glBegin(GL_LINES);
+    glVertex3f(ssa_positions[v3][0], ssa_positions[v3][1], ssa_positions[v3][2]);
+    glVertex3f(ssa_positions[v3][0] + ssa_normals[v3][0] * 0.1,
+        ssa_positions[v3][1] + ssa_normals[v3][1] * 0.1,
+        ssa_positions[v3][2] + ssa_normals[v3][2] * 0.1);
+    glEnd(); */
 }
 
 //////////////////////
@@ -311,34 +304,91 @@ void Skin::smooth(map<int, vector<float>> &joints_lcs) {
 }
 
 //outline joint of interest 
-void Skin::outline(int joint_id) {
+void Skin::outlineJoint(int joint_id, float *lineColor) {
     //save current rendering settings
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushAttrib(GL_LIGHTING_BIT);
 
     //rendering settings for outline
     glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-5.0f, -5.0f);
     glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_BLEND);
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glShadeModel(GL_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPolygonOffset(-2.5f, -2.5f);
+    glColor4f(lineColor[0], lineColor[1], lineColor[2], lineColor[3]);
     glLineWidth(2.5f);
 
     //draw outline
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
     for (vector<int> triangle : joints[joint_id]) {
         drawTriangle(triangle);
     }
+    glEnd();
+    glPopMatrix();
 
-    //restore previous rendering settings
+    //rendering settings for object
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_POLYGON_SMOOTH);
+    
+    //restore lighting and rendering mode
+    glPopAttrib();
+
+    //re-draw object with current depth
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    for (vector<int> triangle : joints[joint_id]) {
+        drawTriangle(triangle);
+    }
+    glEnd();
+    glPopMatrix();
+
+    //restore rendering settings
+    glPopAttrib();
+
+}
+
+//draw each joint in a unique color
+void Skin::drawJoints() {
+    //save current rendering settings
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    //draw each triangle in the skin
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DITHER);
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    for (auto &joint : joints) {
+        for (vector<int> triangle : joint.second) {
+            glColor3ub(joint.first + 1, joint.first + 1, joint.first + 1);
+            drawTriangle(triangle);
+        }
+    }
+    glEnd();
+    glPopMatrix();
+
+    //restore rendering settings
     glPopAttrib();
 }
 
 //draw entire skin
 void Skin::draw() {
     //draw each triangle in the skin
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
     for (vector<int> triangle : triangles) {
         drawTriangle(triangle);
     }
+    glEnd();
+    glPopMatrix();
 }
 
 //print out attribute for testing purposes

@@ -191,6 +191,44 @@ void inverse(vector<float> &matrix) {
     matrix[4 * 2 + 1] = upper_triangle[2];
 }
 
+//replaces a matrix with its transpose
+vector<float> transpose(vector<float> &matrix) {
+    vector<float> tmp;
+
+    for (int i = 0; i < 16; i++) {
+        tmp.push_back(matrix[i]);
+    }
+
+    //temp matrix for upper triangle of rotation matrix and side transpose
+    float upper_triangle[3] = { 0 };
+    float sides[3] = { 0 };
+
+    //invert rotations, note that for a rotation matrix R^-1 = R^T
+    upper_triangle[0] = tmp[4 * 0 + 1];
+    upper_triangle[1] = tmp[4 * 0 + 2];
+    upper_triangle[2] = tmp[4 * 1 + 2];
+    sides[0] = tmp[4 * 0 + 3];
+    sides[1] = tmp[4 * 1 + 3];
+    sides[2] = tmp[4 * 2 + 3];
+
+    tmp[4 * 0 + 1] = tmp[4 * 1 + 0];
+    tmp[4 * 0 + 2] = tmp[4 * 2 + 0];
+    tmp[4 * 1 + 2] = tmp[4 * 2 + 1];
+    tmp[4 * 0 + 3] = tmp[4 * 3 + 0];
+    tmp[4 * 1 + 3] = tmp[4 * 3 + 1];
+    tmp[4 * 2 + 3] = tmp[4 * 3 + 2];
+
+    tmp[4 * 1 + 0] = upper_triangle[0];
+    tmp[4 * 2 + 0] = upper_triangle[1];
+    tmp[4 * 2 + 1] = upper_triangle[2];
+    tmp[4 * 3 + 0] = sides[0];
+    tmp[4 * 3 + 1] = sides[1];
+    tmp[4 * 3 + 2] = sides[2];
+
+    return(tmp);
+}
+
+
 ////////////////////////////////////////////////////////////
 //  functions that help set up the rendering environment  //
 ////////////////////////////////////////////////////////////

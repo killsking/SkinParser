@@ -11,7 +11,7 @@
 
 //include dependancies
 #include <AntTweakBar.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <math.h>
 #include <iostream>
 #include <vector>
@@ -32,6 +32,7 @@ void multiplyScalar(vector<float> &vec, float &scalar);
 void initializeMatrix(vector<float> &matrix);
 void printMatrix(vector<float> &matrix);
 void inverse(vector<float> &matrix);
+vector<float> transpose(vector<float> &matrix);
 
 //functions that help set up the rendering environment
 void drawWCSAxis();
